@@ -21,7 +21,11 @@ class MLMDataset(Dataset):
     def __getitem__(self, idx):
         return self.lines[idx]
     
+import string
+import re
+
 class Tokenizer:
+    punctuation = string.punctuation.replace('-', '')
     def __init__(self, 
                  max_vocab_size: int,
                  truncation: bool = True,
@@ -56,9 +60,10 @@ class Tokenizer:
         return [self.vocab[self.cls_token]] + payload_tokens + padding_tokens
     
     def _preproc(self, text: str) -> List[str]:
-        return text.split()
+        sub_pattern = f'[{re.escape(Tokenizer.punctuation)}]'
+        return re.sub(sub_pattern, ' ', text.lower()).split()
     
-    
+
 def spawn_collate_fn(tokenizer, mask_ratio=0.15):
     cls_token_id = tokenizer.vocab[tokenizer.cls_token]
     sep_token_id = tokenizer.vocab[tokenizer.sep_token]
